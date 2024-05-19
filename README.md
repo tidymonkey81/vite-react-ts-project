@@ -1,5 +1,9 @@
 # React + TypeScript + Vite
 
+## Guidance used for setting up this vite project (with thanks!)
+
+- [Coding Garden: Setting up vite, React, TypeScript, eslint, prettier, vitest, testing-library and react-router](https://www.youtube.com/watch?v=cchqeWY0Nak)
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

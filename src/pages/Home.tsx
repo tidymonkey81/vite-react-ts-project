@@ -1,5 +1,7 @@
-function Home() {
-  return <h1>Hello World</h1>;
+export default function Home() {
+  return (
+    <div style={{ width: '100vw', height: '100vh' }}>
+      Hello World
+    </div>
+  );
 }
-
-export default Home;

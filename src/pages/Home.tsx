@@ -1,5 +1,21 @@
-function Home() {
-  return <h1>Hello World</h1>;
-}
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button, Container, Typography } from '@mui/material';
 
-export default Home;
+export default function Home() {
+  return (
+    <Container style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <Typography variant="h2" component="div" gutterBottom>
+        Classroom Copilot
+      </Typography>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <Button variant="contained" component={Link} to="/tldraw" style={{ margin: '10px' }}>
+          Go to Tldraw
+        </Button>
+        <Button variant="contained" component={Link} to="/flow" style={{ margin: '10px' }}>
+          Go to Flow
+        </Button>
+      </div>
+    </Container>
+  );
+}

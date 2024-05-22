@@ -14,6 +14,9 @@ export default function Home() {
         <Button variant="contained" component={Link} to="/flow" style={{ margin: '10px' }}>
           Go to Flow
         </Button>
+        <Button variant="contained" component={Link} to="/flow-draw" style={{ margin: '10px' }}>
+          Go to Flow-Draw
+        </Button>
       </div>
     </Container>
   );

@@ -3,7 +3,7 @@ import { Button, Container, Typography } from '@mui/material';
 
 export default function Home() {
   return (
-    <Container style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+    <Container style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 50px)' }}>
       <Typography variant="h2" component="div" gutterBottom>
         Classroom Copilot
       </Typography>

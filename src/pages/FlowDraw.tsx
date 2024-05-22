@@ -54,7 +54,7 @@ function FlowApp() {
 
 export default function App() {
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
+    <div style={{ display: 'flex', height: 'calc(100vh - 50px)' }}>
       <div style={{ flex: 1 }}>
         <TldrawApp />
       </div>

@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
+import MenuBar from './components/MenuBar';
 import Home from './pages/Home';
 import Flow from './pages/Flow';
 import Draw from './pages/Draw';
@@ -20,7 +21,10 @@ export function App() {
 export function WrappedApp() {
   return (
     <HashRouter>
-      <App />
+      <div>
+        <MenuBar />
+        <App />
+      </div>
     </HashRouter>
   );
 }

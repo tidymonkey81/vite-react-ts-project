@@ -1,22 +1,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Button, Box } from '@mui/material';
 
 const MenuBar = () => {
   return (
-    <nav className="nav">
-      <ul>
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <Link to="/about">About</Link>
-        </li>
-        <li>
-          <Link to="/contact">Contact</Link>
-        </li>
-        {/* Add more links as needed */}
-      </ul>
-    </nav>
+    <Box display="flex" justifyContent="space-around" bgcolor="white">
+      <Button variant="contained" component={Link} to="/">
+        HOME
+      </Button>
+      <Button variant="contained" component={Link} to="/tldraw">
+        TLDRAW
+      </Button>
+      <Button variant="contained" component={Link} to="/flow">
+        FLOW
+      </Button>
+      <Button variant="contained" component={Link} to="/flow-draw">
+        FLOW-DRAW
+      </Button>
+    </Box>
   );
 };
 

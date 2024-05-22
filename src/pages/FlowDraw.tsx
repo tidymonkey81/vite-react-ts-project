@@ -12,15 +12,15 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 const initialNodes = [
-  { id: '1', position: { x: 0, y: 0 }, data: { label: 'c' } },
-  { id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
+  { id: '1', position: { x: 20, y: 100 }, data: { label: 'c' } },
+  { id: '2', position: { x: 20, y: 200 }, data: { label: '2' } },
 ];
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
 function TldrawApp() {
   return (
-    <div style={{ position: 'fixed', inset: 0 }}>
+    <div style={{ width: '100%', height: '100%' }}>
       <Tldraw />
     </div>
   );

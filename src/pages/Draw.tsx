@@ -3,8 +3,10 @@ import 'tldraw/tldraw.css'
 
 export default function App() {
     return (
-        <div style={{ width: '100%', height: '100%', position: 'fixed', top: '50px' }}>
-            <Tldraw />
+        <div style={{ display: 'flex', height: 'calc(100vh - 75px)' }}>
+            <div style={{ flex: 1 }}>
+                <Tldraw persistenceKey="draw-persistence-key" />
+            </div>
         </div>
     )
 }

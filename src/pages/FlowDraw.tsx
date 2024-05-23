@@ -21,7 +21,7 @@ const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 function TldrawApp() {
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      <Tldraw />
+      <Tldraw persistenceKey="flow-draw-persistence-key" />
     </div>
   );
 }
@@ -54,7 +54,7 @@ function FlowApp() {
 
 export default function App() {
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 50px)' }}>
+    <div style={{ display: 'flex', height: 'calc(100vh - 76px)' }}>
       <div style={{ flex: 1 }}>
         <TldrawApp />
       </div>

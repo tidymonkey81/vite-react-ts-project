@@ -94,14 +94,16 @@ const overrides: TLUiOverrides = {
 
 const App = track(() => {
 	return (
-		<div style={{ width: '100%', height: '93%', position: 'fixed', top: '75px' }}>
-			<Tldraw
+		<div style={{ display: 'flex', height: 'calc(100vh - 75px)' }}>
+            <div style={{ flex: 1 }}>
+				<Tldraw
 				persistenceKey="slideshow-persistence-key"
 				shapeUtils={[SlideShapeUtil]}
 				tools={[SlideShapeTool]}
 				components={components}
 				overrides={overrides}
-			/>
+				/>
+			</div>
 		</div>
 	)
 })

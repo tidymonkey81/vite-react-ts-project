@@ -15,7 +15,7 @@ function TldrawApp() {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <Tldraw
-        persistenceKey="flow-draw-persistence-key"
+        persistenceKey="cc-persistence-key"
         components={{
           Background: () => null, // Disable Tldraw background
         }}

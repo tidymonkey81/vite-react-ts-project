@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
+import dotenv from 'dotenv';
 import Home from './pages/Home';
 import Flow from './pages/Flow';
 import Draw from './pages/Draw';
@@ -8,6 +9,9 @@ import FlowDraw from './pages/FlowDraw';
 import CC from './pages/CC';
 import NotFound from './pages/NotFound';
 import MenuBar from './pages/components/MenuBar';
+import { CopilotKit } from "@copilotkit/react-core";
+import { CopilotSidebar, CopilotPopup } from "@copilotkit/react-ui";
+import "@copilotkit/react-ui/styles.css";
 
 export function App() {
   return (
@@ -27,14 +31,17 @@ export function App() {
 export function WrappedApp() {
   return (
     <HashRouter>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <div>
-          <MenuBar />
+      <MenuBar />
+      <CopilotKit publicApiKey="your_api_key_here">
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+          <div style={{ "--copilot-kit-primary-color": "#1A5BA6" }}>
+          <CopilotPopup />
+          </div>
+          <div style={{ overflowY: 'auto', flexGrow: 1, zIndex: 0  }}>
+            <App />
+          </div>
         </div>
-        <div style={{ overflowY: 'auto', flexGrow: 1 }}>
-          <App />
-        </div>
-      </div>
+      </CopilotKit>
     </HashRouter>
   );
 }

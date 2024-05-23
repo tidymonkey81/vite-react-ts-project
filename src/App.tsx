@@ -1,12 +1,13 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import MenuBar from './pages/components/MenuBar';
 import Home from './pages/Home';
 import Flow from './pages/Flow';
 import Draw from './pages/Draw';
 import DrawFile from './pages/DrawFile';
 import Slides from './pages/Slides';
 import FlowDraw from './pages/FlowDraw';
+import CC from './pages/CC';
 import NotFound from './pages/NotFound';
+import MenuBar from './pages/components/MenuBar';
 
 export function App() {
   return (
@@ -17,6 +18,7 @@ export function App() {
       <Route path="/slides" element={<Slides />} />
       <Route path="/flow" element={<Flow />} />
       <Route path="/flow-draw" element={<FlowDraw />} />
+      <Route path="/cc" element={<CC />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -25,11 +27,13 @@ export function App() {
 export function WrappedApp() {
   return (
     <HashRouter>
-      <div>
-        <MenuBar />
-      </div>
-      <div>
-        <App />
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+        <div>
+          <MenuBar />
+        </div>
+        <div style={{ overflowY: 'auto', flexGrow: 1 }}>
+          <App />
+        </div>
       </div>
     </HashRouter>
   );

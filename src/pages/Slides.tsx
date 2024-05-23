@@ -13,11 +13,11 @@ import {
 	useTools,
 } from 'tldraw'
 import 'tldraw/tldraw.css'
-import { SlideShapeTool } from '../modules/SlideShapeTool'
-import { SlideShapeUtil } from '../modules/SlideShapeUtil'
-import { SlidesPanel } from '../modules/SlidesPanel'
-import '../modules/slides.css'
-import { $currentSlide, getSlides, moveToSlide } from '../modules/useSlides'
+import { SlideShapeTool } from '../modules/draw/SlideShapeTool'
+import { SlideShapeUtil } from '../modules/draw/SlideShapeUtil'
+import { SlidesPanel } from '../modules/draw/SlidesPanel'
+import { $currentSlide, getSlides, moveToSlide } from '../modules/draw/useSlides'
+import '../modules/draw/slides.css'
 
 const components: TLComponents = {
 	HelperButtons: SlidesPanel,
@@ -95,7 +95,6 @@ const overrides: TLUiOverrides = {
 const App = track(() => {
 	return (
 		<div style={{ display: 'flex', height: 'calc(100vh - 75px)' }}>
-            <div style={{ flex: 1 }}>
 				<Tldraw
 				persistenceKey="slideshow-persistence-key"
 				shapeUtils={[SlideShapeUtil]}
@@ -103,7 +102,6 @@ const App = track(() => {
 				components={components}
 				overrides={overrides}
 				/>
-			</div>
 		</div>
 	)
 })

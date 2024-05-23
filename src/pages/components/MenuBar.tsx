@@ -8,6 +8,9 @@ const MenuBar = () => {
       <Button variant="contained" size="small" sx={{ fontSize: '10px' }} component={Link} to="/">
         HOME
       </Button>
+      <Button variant="contained" size="small" sx={{ fontSize: '10px' }} component={Link} to="/cc">
+        CC
+      </Button>
       <Button variant="contained" size="small" sx={{ fontSize: '10px' }} component={Link} to="/draw">
         DRAW
       </Button>

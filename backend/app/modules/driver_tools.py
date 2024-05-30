@@ -1,31 +1,51 @@
-import sys
 import os
-from dotenv import load_dotenv, find_dotenv
-
-load_dotenv(find_dotenv())
-
-sys.path.append(os.getenv("PY_MODULES_PATH"))
-
-import logger_tool as logger
-log_level = os.getenv('LOG_LEVEL')
-logger_name = 'logger_tool'
-logging = logger.get_logger(name=logger_name, log_level=log_level)
-
+import requests
 import time
 from neo4j import GraphDatabase as gd
+import base64
 
-logging.prod(f"Importing Neo4j driver tools...")
+# sys.path.append(os.getenv("PY_MODULES_PATH"))
+
+# import logger_tool as logger
+# log_level = os.getenv('LOG_LEVEL')
+# logger_name = 'logger_tool'
+# logging = logger.get_logger(name=logger_name, log_level=log_level)
+
+# logging.prod(f"Importing Neo4j driver tools...")
+
+# Function to send a request to the Neo4j database
+def send_neo4j_request(query, encoded_credentials=None, database=None, endpoint=None, params=None, method='POST'):
+    if database is None:
+        database = "system"
+    if endpoint is None:
+        endpoint = "/tx/commit"
+    if encoded_credentials is None:
+        credentials = f"{os.getenv('NEO4J_USER')}:{os.getenv('NEO4J_PASSWORD')}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode('utf-8')
+    url = f"http://cc_neo4j:{os.getenv('NEO4J_HTTP_PORT')}/db/{database}{endpoint}"
+    headers = {'Content-Type': 'application/json', 'Authorization': f'Basic {encoded_credentials}'}
+    data = {
+        "statements": [{
+            "statement": query,
+            "parameters": params or {}
+        }]
+    }
+    response = requests.request(method, url, json=data, headers=headers)
+    print(f"Response: {response.json()}")
+    return response.json()
 
 # Function to get the Neo4j driver
 def get_driver(url=None, auth=None):
     if url is None:
-        host = os.getenv("NEO_HOST")
-        port = os.getenv("NEO_PORT")
+        host = os.getenv("NEO4J_HOST")
+        port = os.getenv("NEO4J_BOLT_PORT")
         url = f"bolt://{host}:{port}"
-        auth = (os.getenv("NEO_USER"), os.getenv("NEO_PASSWORD"))
-    else:
-        logging.testing(f"Using scripted Neo4j connection: {url}")
-    logging.prod(f"Creating a Neo4j driver with URL and auth: {url}, {auth}")
+        auth = (os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD"))
+    # else:
+        # logging.testing(f"Using scripted Neo4j connection: {url}")
+        print(f"Using scripted Neo4j connection: {url}")
+    # logging.prod(f"Creating a Neo4j driver with URL and auth: {url}, {auth}")
+    print(f"Creating a Neo4j driver with URL and auth: {url}, {auth}")
     driver = None
     # Try to create the driver. If it fails, retry in 10 seconds and repeat 3 times
     connection_attempts = 0
@@ -34,24 +54,30 @@ def get_driver(url=None, auth=None):
         try:
             driver = gd.driver(url, auth=auth)
         except Exception as e:
-            if connection_attempts < 3:
-                logging.prod(f"Retrying Neo4j driver creation in 3 seconds... (Attempt {connection_attempts})")
-                time.sleep(3)
-            else:
-                logging.error(f"Failed to create Neo4j driver after {connection_attempts} attempts.")
-                return None            
-    logging.prod(f"Neo4j driver created: {driver}")
+            if connection_attempts >= 3:
+                print(f"Failed to create Neo4j driver after {connection_attempts} attempts.")
+                return None
+            print(f"Retrying Neo4j driver creation in 3 seconds... (Attempt {connection_attempts})")
+            time.sleep(3)
+    # logging.prod(f"Neo4j driver created: {driver}")
+    print(f"Neo4j driver created: {driver}")
     # Test the connection
     with driver.session() as session:
-        logging.prod(f"Testing Neo4j connection with session: {session}")
+        # logging.prod(f"Testing Neo4j connection with session: {session}")
+        print(f"Testing Neo4j connection with session: {session}")
         query = "RETURN 1 AS number"
-        logging.query("Running query: {query}")
+        # logging.query("Running query: {query}")
+        print(f"Running query: {query}")
         result = session.run(query)
         if result.single()["number"] == 1:
-            logging.prod("Neo4j connection test passed.")
+            # logging.prod("Neo4j connection test passed.")
+            print("Neo4j connection test passed.")
         else:
-            logging.error("Neo4j connection test failed.")
+            # logging.error("Neo4j connection test failed.")
+            print("Neo4j connection test failed.")
     return driver
+
+from contextlib import suppress
 
 def close_session(session):
     """
@@ -61,19 +87,21 @@ def close_session(session):
     - session: The Neo4j session to be closed.
     """
     if session:
-        try:
+        with suppress(Exception):
             # Attempt to close the session if it's not already closed
-            logging.database(f"Closing Neo4j session: {session}")
+            # logging.database(f"Closing Neo4j session: {session}")
             session.close()
-        except Exception as e:
-            # Handle any exceptions that occur during session closure
-            logging.error(f"An error occurred while closing the Neo4j session: {e}")
-
 
 # Function to close the Neo4j driver
 def close_driver(driver):
-    logging.prod(f"Closing Neo4j driver: {driver}")
+    # logging.prod(f"Closing Neo4j driver: {driver}")
     driver.close()
+
+# Function to create a node in Neo4j via HTTP
+def create_node_http(database, label, properties=None):
+    query = f"CREATE (n:{label} $props) RETURN n"
+    params = {"props": properties}
+    return send_neo4j_request(query, database=database, params=params)
 
 # Function to create a node in Neo4j
 def create_node(session, label, properties, returns=False):
@@ -95,12 +123,12 @@ def create_node(session, label, properties, returns=False):
     transaction = session.write_transaction(_create_node, label, properties)
     if returns:
         transaction_id = transaction.id
-        logging.database(f"Created {label} node with transaction ID {transaction_id} and properties {properties}")
-        created_node = find_node_by_transaction_id(session, transaction_id)
-        return created_node
+        # logging.database(f"Created {label} node with transaction ID {transaction_id} and properties {properties}")
+        print(f"Created {label} node with transaction ID {transaction_id} and properties {properties}")
+        return find_node_by_transaction_id(session, transaction_id)
     else:
-        
-        logging.warning(f"Failed to create {label} node with properties {properties}")
+        # logging.warning(f"Failed to create {label} node with properties {properties}")
+        print(f"Failed to create {label} node with properties {properties}")
         return None
 
 def _create_node(tx, label, properties):
@@ -108,9 +136,10 @@ def _create_node(tx, label, properties):
     CREATE (n:{label} $properties)
     RETURN n
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
+    print(f"Running query: {query}")
     result = tx.run(query, properties=properties)
-    return result.single()[0]
+    return result.single()[0] if result.single() is not None else None  # Handle no record found
 
 # Function to find a node by its element ID
 def find_node_by_transaction_id(session, transaction_id):
@@ -127,20 +156,25 @@ def find_node_by_transaction_id(session, transaction_id):
     return session.read_transaction(_find_node_by_element_id, transaction_id)
     
 def _find_node_by_element_id(tx, transaction_id):
-    query = f"""
+    query = """
     MATCH (n)
     WHERE id(n) = $transaction_id
     RETURN n
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
     result = tx.run(query, transaction_id=transaction_id)
     record = result.single()  # Get the single result record, if any
-    if record is None:
-        logging.warning("No node found with the given transaction ID.")
-        return None
-    else:
-        node = record[0]
-        return node
+    return record[0] if record is not None else None  # Handle no record found
+
+# Function to create a relationship between two nodes in Neo4j via HTTP
+def create_relationship_http(start_node_id, end_node_id, rel_type, properties=None):
+    query = """
+    MATCH (a), (b) WHERE id(a) = $start_id AND id(b) = $end_id
+    CREATE (a)-[r:{rel_type}]->(b)
+    RETURN r
+    """
+    params = {"start_id": start_node_id, "end_id": end_node_id, "rel_type": rel_type, "props": properties or {}}
+    return send_neo4j_request("/db/neo4j/tx/commit", query, params)
 
 # Function to create a relationship between two nodes in Neo4j
 def create_relationship(session, start_node, end_node, label, properties=None, returns=False):
@@ -164,8 +198,7 @@ def create_relationship(session, start_node, end_node, label, properties=None, r
     relationship = session.write_transaction(_create_relationship, start_node, end_node, label, properties)
     if returns:
         relationship_id = relationship.id
-        created_relationship = find_relationship_by_relationship_id(session, relationship_id)
-        return created_relationship
+        return find_relationship_by_relationship_id(session, relationship_id)
     else:
         return None
         
@@ -176,15 +209,10 @@ def _create_relationship(tx, start_node, end_node, label, properties):
     CREATE (a)-[r:{label}]->(b)
     RETURN r
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
     result = tx.run(query, start_node_id=start_node.id, end_node_id=end_node.id, properties=properties)
     single_result = result.single()
-    if single_result is not None:
-        logging.database(f"Created relationship between nodes: {start_node} {label} {end_node}")
-        return single_result[0]
-    else:
-        logging.warning(f"Failed to create relationship between nodes: {start_node}, {end_node}")
-        return None
+    return single_result[0] if single_result is not None else None
 
 def order_list_of_nodes_by_property(session, label, property_name, order="ASC"):
     """
@@ -199,18 +227,17 @@ def order_list_of_nodes_by_property(session, label, property_name, order="ASC"):
     Returns:
         List of matched nodes.
     """
-    return session.read_transaction(_order_list_of_nodes_by_propery, label, property_name, order)
+    return session.read_transaction(_order_list_of_nodes_by_property, label, property_name, order)
 
-def _order_list_of_nodes_by_propery(tx, label, property_name, order):
+def _order_list_of_nodes_by_property(tx, label, property_name, order):
     query = f"""
     MATCH (n:{label})
     RETURN n
     ORDER BY n.{property_name} {order}
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
     result = tx.run(query)
-    records = [record["n"] for record in result]
-    return records
+    return [record["n"] for record in result]
 
 def find_relationship_by_relationship_id(session, relationship_id):
     """
@@ -226,20 +253,15 @@ def find_relationship_by_relationship_id(session, relationship_id):
     return session.read_transaction(_find_relationship_by_relationship_id, relationship_id)
     
 def _find_relationship_by_relationship_id(tx, relationship_id):
-    query = f"""
+    query = """
     MATCH ()-[r]->()
     WHERE id(r) = $relationship_id
-    RETURN r
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
+    print(f"Running query: {query}")
     result = tx.run(query, relationship_id=relationship_id)
     record = result.single()  # Get the single result record, if any
-    if record is None:
-        logging.warning("No relationship found with the given relationship ID.")
-        return None
-    else:
-        relationship = record[0]
-        return relationship
+    return record[0] if record is not None else None  # Handle no record found
 
 # Function to create a relationship between two nodes in two different databases
 def create_relationship_between_databases(session, start_database, start_node, end_database, end_node, label, properties=None, returns=False):
@@ -264,8 +286,7 @@ def create_relationship_between_databases(session, start_database, start_node, e
     relationship = session.write_transaction(_create_relationship_between_databases, start_database, start_node, end_database, end_node, label, properties)
     if returns:
         relationship_id = relationship.id
-        created_relationship = find_relationship_by_relationship_id(session, relationship_id)
-        return created_relationship
+        return find_relationship_by_relationship_id(session, relationship_id)
     else:
         return None
 
@@ -276,14 +297,11 @@ def _create_relationship_between_databases(tx, start_database, start_node, end_d
     CREATE (a)-[r:{label}]->(b)
     RETURN r
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
+    print(f"Running query: {query}")
     result = tx.run(query, start_node_id=start_node, end_node_id=end_node, properties=properties)
     single_result = result.single()
-    if single_result is not None:
-        return single_result[0]
-    else:
-        logging.warning(f"Failed to create relationship between nodes: {start_node}, {end_node}")
-        return None
+    return single_result[0] if single_result is not None else None
 
 # Function to find nodes in Neo4j database by label
 def find_nodes_by_label(session, label):
@@ -307,10 +325,10 @@ def _find_nodes_by_label(tx, label):
     MATCH (n:{label})
     RETURN n
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
+    print(f"Running query: {query}")
     result = tx.run(query)
-    records = [record["n"] for record in result]
-    return records
+    return [record["n"] for record in result]
 
 # Function to find nodes in Neo4j database by label and properties
 def find_nodes_by_label_and_properties(session, label, properties):
@@ -334,10 +352,10 @@ def _find_nodes_by_label_and_properties(tx, label, properties):
     WHERE {' AND '.join([f'n.{key} = ${key}' for key in properties.keys()])}
     RETURN n
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
+    print(f"Running query: {query}")
     result = tx.run(query, **properties)
-    records = [record["n"] for record in result]
-    return records
+    return [record["n"] for record in result]
 
 # Function to find relationships in Neo4j database by type
 def find_relationships_by_type(session, rel_type):
@@ -358,10 +376,10 @@ def _find_relationships_by_type(tx, rel_type):
     MATCH ()-[r:{rel_type}]->()
     RETURN r
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
+    print(f"Running query: {query}")
     result = tx.run(query)
-    records = [record["r"] for record in result]
-    return records
+    return [record["r"] for record in result]
 
 # Function to find relationships in Neo4j database by type and properties
 def find_relationships_by_type_and_properties(session, label, properties):
@@ -385,10 +403,10 @@ def _find_relationships_by_type_and_properties(tx, label, properties):
     WHERE {' AND '.join([f'r.{key} = ${key}' for key in properties.keys()])}
     RETURN r
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
+    print(f"Running query: {query}")
     result = tx.run(query, **properties)
-    records = [record["r"] for record in result]
-    return records
+    return [record["r"] for record in result]
 
 # Function to find nodes and relationships in Neo4j database by label and properties
 def find_nodes_and_relationships_by_label_and_properties(session, label, properties):
@@ -411,10 +429,9 @@ def _find_nodes_and_relationships_by_label_and_properties(tx, label, properties)
     WHERE {' AND '.join([f'n.{key} = ${key}' for key in properties.keys()])}
     RETURN n
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
     result = tx.run(query, **properties)
-    records = [record["n"] for record in result]
-    return records
+    return [record["n"] for record in result]
 
 # Function to delete nodes in Neo4j based on given criteria
 def delete_nodes(session, criteria, delete_related=False):
@@ -457,7 +474,7 @@ def _delete_nodes(tx, criteria, delete_related=False):
         WHERE {condition_str}
         DELETE n
         """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
     tx.run(query, **criteria)
 
 # Function to delete all nodes and relationships in the Neo4j database in batches
@@ -475,7 +492,8 @@ def delete_lots_of_nodes_and_relationships(session):
         total_deleted += deleted_count
         if deleted_count == 0:
             break  # Exit the loop if no more nodes are deleted
-    logging.prod(f"All nodes and relationships have been deleted. Total deleted: {total_deleted}")
+    # logging.prod(f"All nodes and relationships have been deleted. Total deleted: {total_deleted}")
+    print(f"All nodes and relationships have been deleted. Total deleted: {total_deleted}")
 
 def _delete_batch(tx):
     """
@@ -491,7 +509,7 @@ def _delete_batch(tx):
     DETACH DELETE n
     RETURN count(*)
     """
-    logging.query(f"Running query: {query}")
+    # logging.query(f"Running query: {query}")
     result = tx.run(query, batch_size=batch_size)
     result_data = result.single()
     
@@ -501,34 +519,51 @@ def _delete_batch(tx):
     if deleted_count is None:  # This check might be redundant, but kept for clarity
         return 0
     if deleted_count > 0:
-        logging.database(f"Deleted {deleted_count} nodes.")
+        # logging.database(f"Deleted {deleted_count} nodes.")
+        print(f"Deleted {deleted_count} nodes.")
     return deleted_count
 
 def delete_all_constraints(session):
     # Correct command to fetch all constraints for Neo4j 4.x and later
     constraints_query = "SHOW CONSTRAINTS"
-    logging.query(f"Running query: {constraints_query}")
-    constraints_query_result = session.run(constraints_query).data()
-
-    if constraints_query_result:
+    # logging.query(f"Running query: {constraints_query}")
+    if constraints_query_result := session.run(constraints_query).data():
         for constraint in constraints_query_result:
             # Ensure correct key is used to extract constraint name
             constraint_name = constraint['name']  # Adjust this if necessary
             drop_query = f"DROP CONSTRAINT {constraint_name}"
-            logging.query(f"Running query: {drop_query}")
+            # logging.query(f"Running query: {drop_query}")
             session.run(drop_query)
-            logging.database(f"Dropped constraint: {constraint_name}")
+            # logging.database(f"Dropped constraint: {constraint_name}")
+            print(f"Dropped constraint: {constraint_name}")
     else:
-        logging.warning("No constraints found to delete.")
+        # logging.warning("No constraints found to delete.")
+        print("No constraints found to delete.")
         
 def reset_all_indexes(session):
     indexes = session.run("SHOW INDEXES").data()
     for index in indexes:
         index_name = index['name']
         session.run(f"DROP INDEX {index_name}")
-        logging.info(f"Deleted index: {index_name}")
+        # logging.info(f"Deleted index: {index_name}")
+        print(f"Deleted index: {index_name}")
 
 def reset_database(session):
     delete_lots_of_nodes_and_relationships(session)
     delete_all_constraints(session)
     reset_all_indexes(session)
+
+def create_database(session, db_name):
+    """
+    Creates a new database in Neo4j if it does not already exist.
+
+    Args:
+        session (neo4j.Session): The Neo4j session.
+        db_name (str): The name of the database to create.
+    """
+    query = f"CREATE DATABASE `{db_name}` IF NOT EXISTS"
+    try:
+        session.run(query)
+        print(f"Database {db_name} created successfully.")
+    except Exception as e:
+        print(f"Failed to create database {db_name}: {str(e)}")

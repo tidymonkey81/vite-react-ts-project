@@ -7,11 +7,14 @@ const MenuBar = () => {
       <Button variant="contained" size="small" sx={{ fontSize: '10px' }} component={Link} to="/">
         HOME
       </Button>
-      <Button variant="contained" size="small" sx={{ fontSize: '10px' }} component={Link} to="/cc">
-        CC
+      <Button variant="contained" size="small" sx={{ fontSize: '10px' }} component={Link} to="/cc-admin">
+        CC ADMIN
       </Button>
       <Button variant="contained" size="small" sx={{ fontSize: '10px' }} component={Link} to="/school-admin">
         SCHOOL ADMIN
+      </Button>
+      <Button variant="contained" size="small" sx={{ fontSize: '10px' }} component={Link} to="/cc">
+        CC
       </Button>
       <Button variant="contained" size="small" sx={{ fontSize: '10px' }} component={Link} to="/propagator">
         PROPAGATOR

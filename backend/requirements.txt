@@ -1,6 +1,7 @@
 python-dotenv
 fastapi
 uvicorn
-# neo4j
-# pandas
-# openpyxl
+neo4j
+pandas
+requests
+openpyxl

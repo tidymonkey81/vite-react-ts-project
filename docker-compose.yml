@@ -1,0 +1,44 @@
+services:
+  cc_frontend:
+    build:
+      context: ./frontend
+    container_name: cc_frontend
+    ports:
+      - "8001:8001"
+    depends_on:
+      - cc_backend
+    networks:
+      - app-network
+
+  cc_backend:
+    build:
+      context: ./backend
+    env_file:
+        - ./.env
+    container_name: cc_backend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8000:8000"
+    depends_on:
+      - cc_neo4j
+    networks:
+      - app-network
+
+  cc_neo4j:
+    image: neo4j:enterprise
+    container_name: cc_neo4j
+    environment:
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+    ports:
+      - "${NEO4J_HTTP_PORT}:${NEO4J_HTTP_PORT}"
+      - "${NEO4J_BOLT_PORT}:${NEO4J_BOLT_PORT}"
+    volumes:
+      - $HOME/neo4j/data:/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,7 +1,8 @@
 import React from 'react'; // Add this line
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Home from './src/pages/Nav/Home';
-import SchoolAdmin from './src/pages/Admin/Admin';
+import CCAdmin from './src/pages/Admin/CCAdmin';
+import SchoolAdmin from './src/pages/Admin/SchoolAdmin';
 import Flow from './src/pages/Flow/Flow';
 import Draw from './src/pages/Draw/Draw';
 import DrawFile from './src/pages/Draw/DrawFile';
@@ -19,6 +20,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/cc-admin" element={<CCAdmin />} />
       <Route path="/school-admin" element={<SchoolAdmin />} />
       <Route path="/draw" element={<Draw />} />
       <Route path="/draw-file" element={<DrawFile />} />

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 function CCAdmin() {
-  const [backendUrl, setBackendUrl] = useState('http://localhost:8000');
+  const [backendUrl, setBackendUrl] = useState(`http://localhost:${import.meta.env.VITE_BACKEND_PORT}`);
 
   async function createGlobalSchoolDB() {
     try {

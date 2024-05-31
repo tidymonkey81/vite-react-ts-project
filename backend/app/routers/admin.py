@@ -7,5 +7,5 @@ router = APIRouter()
 @router.post("/create-global-school-db")
 async def create_global_school_db():
     query = "CREATE DATABASE `GlobalSchools` IF NOT EXISTS"
-    return send_neo4j_request(query, "system")
+    return send_neo4j_request(query) 
 

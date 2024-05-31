@@ -8,26 +8,14 @@ export default function Home() {
         Classroom Copilot
       </Typography>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <Button variant="contained" component={Link} to="/cc-admin" style={{ margin: '10px' }}>
-          CC Admin
-        </Button>
-        <Button variant="contained" component={Link} to="/school-admin" style={{ margin: '10px' }}>
-          School Admin
-        </Button>
-        <Button variant="contained" component={Link} to="/cc" style={{ margin: '10px' }}>
-          CC
-        </Button>
-        <Button variant="contained" component={Link} to="/propagator" style={{ margin: '10px' }}>
-          Propagator
-        </Button>
-        <Button variant="contained" component={Link} to="/draw" style={{ margin: '10px' }}>
-          Tldraw
+        <Button variant="contained" component={Link} to="/admin" style={{ margin: '10px' }}>
+          Admin
         </Button>
         <Button variant="contained" component={Link} to="/flow" style={{ margin: '10px' }}>
           Flow
         </Button>
-        <Button variant="contained" component={Link} to="/flow-draw" style={{ margin: '10px' }}>
-          Flow/Draw
+        <Button variant="contained" component={Link} to="/draw" style={{ margin: '10px' }}>
+          Draw
         </Button>
       </div>
     </Container>
